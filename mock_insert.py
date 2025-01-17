@@ -1,8 +1,8 @@
 import time
 import subprocess
 import psycopg
-from psycopg import sql
 from live_connection import LiveConnectionLog
+import datetime
 
 # 数据库连接配置
 DB_CONFIG = {"dbname": "public", "host": "localhost", "port": 4003, "autocommit": True}
@@ -16,12 +16,7 @@ INSERT_SQL = """INSERT INTO live_connection_log (
     connect_mode, connect_error, connect_id, connect_protocol,
     transport_protocol, isCamSDK, connect_step1_time,
     connect_step2_time, record_time
-) VALUES (
-%s, %s, %s, %s, %s,
-%s, %s, %s, %s, %s,
-%s, %s, %s, %s, %s,
-%s, %s, %s, %s, %s,
-%s, %s, %s, %s, %s);
+) VALUES {};
 """
 
 
@@ -49,35 +44,32 @@ def insert_data(cursor, data: list[tuple]):
             formatted_row = []
             for value in row:
                 if value is None:
-                    formatted_row.append('NULL')
+                    formatted_row.append("NULL")
                 elif isinstance(value, str):
-                    formatted_row.append(value)
+                    formatted_row.append(repr(value))
                 else:
                     formatted_row.append(str(value))
             values.append(f"({', '.join(formatted_row)})")
-        
-        # 构建完整的INSERT语句
-        insert_cmd = f"{INSERT_SQL % tuple(values)};"
-        
+        # make a tmp file to store the data
+        with open("tmp.sql", "w") as f:
+            # 构建完整的INSERT语句
+            insert_cmd = INSERT_SQL.format(", ".join(values))
+            f.write(insert_cmd)
+
         # 使用psql命令执行插入
-        psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -c \"{insert_cmd}\""
+        psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -f tmp.sql"
         subprocess.run(psql_cmd, shell=True, check=True)
-        
-        print(f"成功插入 {len(data)} 条数据")
+
+        print(f"成功插入 {len(data)} 条数据， 时间：{datetime.datetime.now().isoformat()}")
     except Exception as e:
         print(f"插入数据时出错: {e}")
-        print(f"SQL 语句: {insert_cmd}")
         print(f"第一条数据示例: {data[0] if data else '无数据'}")
         print(f"错误详情: {str(e)}")
 
 
 def create_table_flow():
-    with open("prod-camera-connection.sql", "r") as f:
-        sql = f.read()
-        with psycopg.connect(**DB_CONFIG) as conn:
-            with conn.cursor() as cur:
-                cur.execute(sql)
-                conn.commit()
+    psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -f prod-camera-connection.sql"
+    subprocess.run(psql_cmd, shell=True, check=True)
 
 
 def main():
@@ -102,6 +94,8 @@ def main():
             elapsed = time.time() - start_time
             if elapsed < 1:
                 time.sleep(1 - elapsed)
+            else:
+                print("WARN: 数据生成和插入时间超过1秒")
     finally:
         # 确保连接关闭
         cur.close()
