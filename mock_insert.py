@@ -1,14 +1,14 @@
 import time
+import subprocess
 import psycopg
 from psycopg import sql
 from live_connection import LiveConnectionLog
 
 # 数据库连接配置
-DB_CONFIG = {"dbname": "public", "host": "localhost", "port": 4003}
+DB_CONFIG = {"dbname": "public", "host": "localhost", "port": 4003, "autocommit": True}
 
 # SQL插入语句
-INSERT_SQL = """
-INSERT INTO live_connection_log (
+INSERT_SQL = """INSERT INTO live_connection_log (
     os, app_version, view_mode, first_frame_time, p2p_sdk_version,
     connect_retry_times, video_definition, net_mode, iot_online,
     entry_mode, device_model, device_mac, device_mac_suffix,
@@ -41,14 +41,32 @@ def generate_data_batch():
 
 def insert_data(cursor, data: list[tuple]):
     """将数据批量插入数据库"""
-    for row in data:
-        cursor.execute(INSERT_SQL, row)
-
     try:
+        # 将数据格式化为psql可接受的格式
+        values = []
+        for row in data:
+            # 将每个值转换为字符串并转义单引号
+            formatted_row = []
+            for value in row:
+                if value is None:
+                    formatted_row.append('NULL')
+                elif isinstance(value, str):
+                    formatted_row.append(value)
+                else:
+                    formatted_row.append(str(value))
+            values.append(f"({', '.join(formatted_row)})")
+        
+        # 构建完整的INSERT语句
+        insert_cmd = f"{INSERT_SQL % tuple(values)};"
+        
+        # 使用psql命令执行插入
+        psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -c \"{insert_cmd}\""
+        subprocess.run(psql_cmd, shell=True, check=True)
+        
         print(f"成功插入 {len(data)} 条数据")
     except Exception as e:
         print(f"插入数据时出错: {e}")
-        print(f"SQL 语句: {INSERT_SQL}")
+        print(f"SQL 语句: {insert_cmd}")
         print(f"第一条数据示例: {data[0] if data else '无数据'}")
         print(f"错误详情: {str(e)}")
 
