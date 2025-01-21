@@ -1,0 +1,13 @@
+## The datanode can export its metrics and send to Prometheus compatible service (e.g. send to `greptimedb` itself) from remote-write API.
+## This is only used for `greptimedb` to export its own metrics internally. It's different from prometheus scrape.
+[export_metrics]
+
+## whether enable export metrics.
+enable = true
+
+## The interval of export metrics.
+write_interval = "30s"
+
+[export_metrics.remote_write]
+## The url the metrics send to. The url example can be: `http://127.0.0.1:4000/v1/prometheus/write?db=greptime_metrics`.
+url = "http://127.0.0.1:14514/v1/prometheus/write?db=greptime_metrics"
