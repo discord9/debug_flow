@@ -1,6 +1,6 @@
 import time
 import subprocess
-import psycopg
+import random
 from live_connection import LiveConnectionLog
 import datetime
 
@@ -24,17 +24,19 @@ def generate_data_batch():
     """生成一批数据，1000条时间线，每条5行"""
     data = []
     combinations = LiveConnectionLog.generate_device_combinations(1000)
+    meta_seed = 42
+    random.seed(meta_seed)
 
     for model, mac_suffix in combinations:
         mock_data = LiveConnectionLog.generate_mock_data(
-            device_model=model, device_mac_suffix=mac_suffix, num_rows=5
+            device_model=model, device_mac_suffix=mac_suffix, num_rows=5, seed=random.randint(0, 1000000)
         )
         data.extend([log.to_tuple() for log in mock_data])
 
     return data
 
 
-def insert_data(cursor, data: list[tuple]):
+def insert_data(data: list[tuple]):
     """将数据批量插入数据库"""
     try:
         # 将数据格式化为psql可接受的格式
@@ -76,9 +78,7 @@ def main():
     create_table_flow()
 
     # 创建数据库连接
-    conn = psycopg.connect(**DB_CONFIG)
     try:
-        cur = conn.cursor()
 
         while True:
             start_time = time.time()
@@ -87,8 +87,7 @@ def main():
             data = generate_data_batch()
 
             # 插入数据库
-            insert_data(cur, data)
-            conn.commit()
+            insert_data(data)
 
             # 计算并等待剩余时间
             elapsed = time.time() - start_time
@@ -98,8 +97,7 @@ def main():
                 print("WARN: 数据生成和插入时间超过1秒")
     finally:
         # 确保连接关闭
-        cur.close()
-        conn.close()
+        pass
 
 
 if __name__ == "__main__":
