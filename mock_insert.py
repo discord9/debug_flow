@@ -61,7 +61,7 @@ def insert_data(data: list[tuple]):
             f.write(insert_cmd)
 
         # 使用psql命令执行插入
-        psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -f tmp.sql"
+        psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['psql_port']} -d {DB_CONFIG['dbname']} -f tmp.sql"
         subprocess.run(psql_cmd, shell=True, check=True)
 
         print(f"成功插入 {len(data)} 条数据， 时间：{datetime.datetime.now().isoformat()}")
@@ -72,8 +72,9 @@ def insert_data(data: list[tuple]):
 
 
 def create_table_flow():
-    psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['port']} -d {DB_CONFIG['dbname']} -f prod-camera-connection.sql"
-    subprocess.run(psql_cmd, shell=True, check=True)
+    psql_cmd = f"psql -h {DB_CONFIG['host']} -p {DB_CONFIG['psql_port']} -d {DB_CONFIG['dbname']} -f prod-camera-connection.sql"
+    mysql_cmd = f"mysql --host={DB_CONFIG['host']} --port={DB_CONFIG['mysql_port']} --database={DB_CONFIG['dbname']} < prod-camera-connection.sql"
+    subprocess.run(mysql_cmd, shell=True, check=True)
 
 
 def main():

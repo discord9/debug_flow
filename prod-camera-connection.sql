@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS `live_connection_statistics_rate_1h` (
   `total_connect` BIGINT NULL,
   `conection_rate` DOUBLE NULL,
   `record_time_window` TIMESTAMP(9) NOT NULL,
-  `update_at` TIMESTAMP NULL,
   TIME INDEX (`record_time_window`),
   PRIMARY KEY (`os`, `app_version`,`device_model`, `connect_protocol`, `device_firmware_version`)
 )
@@ -106,7 +105,6 @@ CREATE TABLE IF NOT EXISTS `live_connection_statistics_speed_1h` (
   `avg_first_frame_time` DOUBLE NULL,
   `max_first_frame_time` DOUBLE NULL,
   `record_time_window` TIMESTAMP(9) NOT NULL,
-  `update_at` TIMESTAMP NULL,
   TIME INDEX (`record_time_window`),
   PRIMARY KEY (`os`, `app_version`,`device_model`, `connect_protocol`, `device_firmware_version`)
 )
@@ -151,7 +149,6 @@ CREATE TABLE IF NOT EXISTS `live_connection_statistics_common_1h` (
   `device_firmware_version` STRING NULL,
   `total_connect` BIGINT NULL,
   `record_time_window` TIMESTAMP(9) NOT NULL,
-  `update_at` TIMESTAMP NULL,
   TIME INDEX (`record_time_window`),
   PRIMARY KEY (`os`, `app_version`, `device_model`, `connect_error`, `connect_protocol`, `device_firmware_version`)
 )
@@ -208,7 +205,6 @@ CREATE TABLE IF NOT EXISTS `live_connection_statistics_first_frame_time_1h_v2` (
   `buket10_connect` BIGINT NULL,
   `buket11_connect` BIGINT NULL,
   `record_time_window` TIMESTAMP(9) NOT NULL,
-  `update_at` TIMESTAMP NULL,
   TIME INDEX (`record_time_window`),
   PRIMARY KEY (`os`, `app_version`,`device_model`, `connect_protocol`)
 )

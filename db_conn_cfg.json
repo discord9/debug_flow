@@ -1,5 +1,6 @@
 {
     "dbname": "public",
-    "host": "localhost",
-    "port": 19196
+    "host": "127.0.0.1",
+    "mysql_port": 19195,
+    "psql_port": 19196
 }

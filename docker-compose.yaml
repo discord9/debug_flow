@@ -79,6 +79,7 @@ services:
     image: *greptimedb_image
     container_name: frontend0
     ports:
+      - 19195:4002 # for insert using mysql protocol
       - 19196:4003 # for insert using psql protocol
     command:
       - frontend
