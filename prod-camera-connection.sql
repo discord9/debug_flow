@@ -84,7 +84,7 @@ SELECT
   arrow_cast(sum(CASE WHEN connect_result = 1 THEN 1 ELSE 0 END), 'Float64') / arrow_cast(count(connect_result), 'Float64') AS conection_rate, 
   date_bin(INTERVAL '1 hour', record_time) AS record_time_window, 
 FROM live_connection_log 
-WHERE iot_online = 1 and record_time between '2025-01-16 23:00:00' and '2025-01-17 00:00:00'
+WHERE iot_online = 1
 GROUP BY 
   os,
   app_version,

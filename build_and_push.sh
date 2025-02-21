@@ -2,7 +2,7 @@
 
 set -x
 
-export IMAGE_TAG="v0.11.09"
+export IMAGE_TAG="v0.12.0rc1"
 
 docker build -f ./Dockerfile -t localhost:5001/nightly-greptimedb:${IMAGE_TAG} .
 

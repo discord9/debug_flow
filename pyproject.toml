@@ -2,5 +2,5 @@
 name = "dbg-flow"
 version = "0.1.0"
 dependencies = [
-    "psycopg"
+    "psycopg2-binary"
 ]

@@ -9,9 +9,6 @@ services:
   etcd0:
     <<: *etcd_common_settings
     container_name: etcd0
-    ports:
-      - 2379:2379
-      - 2380:2380
     command:
       - --name=etcd0
       - --data-dir=/var/lib/etcd
@@ -37,9 +34,6 @@ services:
   metasrv:
     image: *greptimedb_image
     container_name: metasrv
-    ports:
-      - 3002:3002
-      - 3003:3003 # for HTTP, later will be removed
     command:
       - metasrv
       - start
@@ -60,9 +54,6 @@ services:
   datanode0:
     image: *greptimedb_image
     container_name: datanode0
-    ports:
-      - 3001:3001
-      - 5000:5000
     command:
       - datanode
       - start
@@ -74,7 +65,7 @@ services:
     volumes:
       - /tmp/greptimedb-cluster-docker-compose/datanode0:/tmp/greptimedb
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://datanode0:5000/admin/health" ]
+      test: [ "CMD", "curl", "-f", "http://datanode0:5000/health" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -88,10 +79,7 @@ services:
     image: *greptimedb_image
     container_name: frontend0
     ports:
-      - 4000:4000
-      - 4001:4001
-      - 4002:4002
-      - 4003:4003
+      - 19196:4003 # for insert using psql protocol
     command:
       - frontend
       - start
@@ -101,7 +89,7 @@ services:
       - --mysql-addr=0.0.0.0:4002
       - --postgres-addr=0.0.0.0:4003
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://frontend0:4000/admin/health" ]
+      test: [ "CMD", "curl", "-f", "http://frontend0:4000/health" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -115,8 +103,7 @@ services:
     image: *greptimedb_image
     container_name: flownode0
     ports:
-      - 4004:4004
-      - 6666:5001
+      - 6666:5001 # for manual health check
     command:
       - flownode
       - start
@@ -125,6 +112,11 @@ services:
       - --rpc-addr=0.0.0.0:4004
       - --rpc-hostname=flownode0:4004
       - --http-addr=0.0.0.0:5001
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://flownode0:5001/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     depends_on:
       frontend0:
         condition: service_healthy
@@ -134,8 +126,6 @@ services:
   standalone:
     image: *greptimedb_image
     container_name: standalone
-    ports:
-      - 14514:14514
     command:
       - standalone
       - start
@@ -166,7 +156,7 @@ services:
     container_name: grafana
     restart: always
     ports:
-      - 3000:3000
+      - 15020:3000 # for grafana view metrics
     networks:
       - greptimedb
     volumes:

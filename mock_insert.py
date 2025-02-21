@@ -3,9 +3,11 @@ import subprocess
 import random
 from live_connection import LiveConnectionLog
 import datetime
+import json
 
 # 数据库连接配置
-DB_CONFIG = {"dbname": "public", "host": "localhost", "port": 4003, "autocommit": True}
+with open('db_conn_cfg.json') as f:
+    DB_CONFIG = json.load(f)
 
 # SQL插入语句
 INSERT_SQL = """INSERT INTO live_connection_log (
