@@ -68,7 +68,7 @@ WITH(
 DROP FLOW IF EXISTS `live_connection_aggregation_rate_1h`;
 CREATE FLOW live_connection_aggregation_rate_1h
 SINK TO live_connection_statistics_rate_1h
-EXPIRE AFTER INTERVAL '2 minutes'
+EXPIRE AFTER INTERVAL '2' MINUTE
 AS 
 SELECT 
   os,
@@ -81,7 +81,7 @@ SELECT
   sum(CASE WHEN connect_result = 0 THEN 1 ELSE 0 END) AS total_connect_result_fail, 
   count(connect_result) AS total_connect, 
   arrow_cast(sum(CASE WHEN connect_result = 1 THEN 1 ELSE 0 END), 'Float64') / arrow_cast(count(connect_result), 'Float64') AS conection_rate, 
-  date_bin(INTERVAL '1 hour', record_time) AS record_time_window, 
+  date_bin(INTERVAL '1' HOUR, record_time) AS record_time_window, 
 FROM live_connection_log 
 WHERE iot_online = 1
 GROUP BY 
@@ -115,7 +115,7 @@ WITH(
 DROP FLOW IF EXISTS `live_connection_aggregation_speed_1h`;
 CREATE FLOW live_connection_aggregation_speed_1h
 SINK TO live_connection_statistics_speed_1h
-EXPIRE AFTER INTERVAL '2 minutes'
+EXPIRE AFTER INTERVAL '2' MINUTE
 AS 
 SELECT 
   os,
@@ -127,7 +127,7 @@ SELECT
   count(connect_result) AS total_connect, 
   avg(first_frame_time) AS avg_first_frame_time, 
   max(first_frame_time) AS max_first_frame_time, 
-  date_bin(INTERVAL '1 hour', record_time) AS record_time_window, 
+  date_bin(INTERVAL '1' HOUR, record_time) AS record_time_window, 
 FROM live_connection_log 
 WHERE iot_online = 1 and connect_result = 1 and first_frame_time > 0 and first_frame_time < 60000
 GROUP BY 
@@ -160,7 +160,7 @@ WITH(
 DROP FLOW IF EXISTS `live_connection_aggregation_common_1h`;
 CREATE FLOW live_connection_aggregation_common_1h
 SINK TO live_connection_statistics_common_1h
-EXPIRE AFTER INTERVAL '2 minutes'
+EXPIRE AFTER INTERVAL '2' MINUTE
 AS
 SELECT 
   os,
@@ -170,7 +170,7 @@ SELECT
   connect_error, 
   device_firmware_version,
   count(connect_protocol) AS total_connect, 
-  date_bin(INTERVAL '1 hour', record_time) AS record_time_window, 
+  date_bin(INTERVAL '1' HOUR, record_time) AS record_time_window, 
 FROM live_connection_log 
 WHERE iot_online = 1 and connect_result != 1
 GROUP BY 

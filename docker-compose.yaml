@@ -3,7 +3,7 @@ x-custom:
   etcd_common_settings: &etcd_common_settings
     image: "${ETCD_REGISTRY:-quay.io}/${ETCD_NAMESPACE:-coreos}/etcd:${ETCD_VERSION:-v3.5.10}"
     entrypoint: /usr/local/bin/etcd
-  greptimedb_image: &greptimedb_image "localhost:5001/nightly-greptimedb:v0.11.09"
+  greptimedb_image: &greptimedb_image "localhost:5001/nightly-greptimedb:latest"
 
 services:
   etcd0:
